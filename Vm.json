@@ -1,0 +1,318 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        // stgaccount name
+        "stgaccountname": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // location name
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // sku name
+        "skuname": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Standard_ZRS",
+                "Premium_LRS",
+                "Premium_ZRS",
+                "Standard_GZRS",
+                "Standard_RAGZRS"
+            ],
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // public ip name
+        "publicipname": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // public ip type
+        "piptype": {
+            "type": "string",
+            "defaultValue": "Dynamic",
+            "allowedValues": [
+                "Dynamic",
+                "Static"
+            ],
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // public ip dns name
+        "dnsname": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // NSG Name
+        "nsgname": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // Vnet Name
+        "vnetname": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // vnet address space
+        "vnetaddressspace": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // subnet name
+        "subnetname": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // subnet addressprefix
+        "subnetaddprefix": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // NIC Name
+        "nicname": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // Vm name
+        "vmname": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // vmusername
+        "vmusername": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        // vm pswd
+        "vmpaswd": {
+            "type": "securestring",
+            "metadata": {
+                "description": "description"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            // Create A Storage Account
+            "name": "[parameters('stgaccountname')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-04-01",
+            "location": "[parameters('location')]",
+            "tags": {
+
+                "displayName": "windowsVM1 Storage Account"
+            },
+            "sku": {
+                "name": "[parameters('skuname')]"
+            },
+            "kind": "Storage"
+        },
+        {
+            // Create A Public IP
+            "name": "[parameters('publicipname')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "location": "[parameters('location')]",
+            "tags": {
+                "displayName": "PublicIPAddress"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "[parameters('piptype')]",
+                "publicIPAddressVersion": "IPv4",
+                "dnsSettings": {
+
+                    "domainNameLabel": "[parameters('dnsname')]"
+                }
+            }
+        },
+        {
+            // Create A NSG
+            "name": "[parameters('nsgname')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP-Allow",
+                        "properties": {
+                            "description": "description",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+            
+        },
+        {
+            // Create A VirtualNetwork
+            "name": "[parameters('vnetname')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-11-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgname'))]"
+            ],
+            "tags": {
+
+                "displayName": "windowsVM1-VirtualNetwork"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vnetaddressspace')]"
+                    ]
+                },
+                "subnets": [
+                    {
+
+                        "name": "[parameters('subnetname')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetaddprefix')]",
+                            "networkSecurityGroup": {
+
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgname'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            // NIC Creating
+            "name": "[parameters('nicname')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+
+                "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicipname'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetname'))]"
+            ],
+            "tags": {
+
+                "displayName": "windowsVM1 Network Interface"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "[parameters('piptype')]",
+                            "privateIPAddressVersion": "IPv4",
+                            "publicIPAddress": {
+
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicipname'))]"
+                            },
+                            "subnet": {
+
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('vnetname'), parameters('subnetname'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            // Create VM
+            "name": "[parameters('vmname')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+
+                "[resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('stgaccountname')))]",
+                "[resourceId('Microsoft.Network/networkInterfaces',parameters('nicname'))]"
+            ],
+            "tags": {
+
+                "displayName": "windowsVM1"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_B1s"
+                },
+                "osProfile": {
+
+                    "computerName": "windowsVm",
+                    "adminUsername": "[parameters('vmusername')]",
+                    "adminPassword": "[parameters('vmpaswd')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2012-R2-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+
+                        "name": "windowsVM1OSDisk",
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicname'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', toLower(parameters('stgaccountname')))).primaryEndpoints.blob]"
+                    }
+                }
+            }
+            
+        }
+    ],
+    "outputs": {}
+}
