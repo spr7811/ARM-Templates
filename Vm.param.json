@@ -1,0 +1,55 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+
+        "stgaccountname": {
+            "value": "stgdemo8749" 
+        },
+        "location": {
+            "value": "East US" 
+        },
+
+        "skuname": {
+            "value": "Standard_LRS"
+        },
+        "publicipname": {
+            "value": "vmpip" 
+        },
+        "piptype": {
+            "value": "Dynamic"
+        },
+        "dnsname": {
+            "value": "pipdns" 
+        },
+        "nsgname": {
+            "value": "demonsg" 
+        },
+        "vnetname": {
+            "value": "demovnet" 
+        },
+        "vnetaddressspace": {
+            "value": "10.0.0.0/24" 
+        },
+        "subnetname": {
+            "value": "Subnet-1" 
+        },
+        "subnetaddprefix": {
+            "value": "10.0.0.0/29" 
+        },
+        "nicname": {
+            "value": "demonic" 
+        },
+        "vmname": {
+            "value": "windowsvm" 
+        },
+        "vmusername": {
+            "value": "vm" 
+        },
+        "vmpaswd": {
+            "value": "Rajasekharreddy@7" 
+        }
+        
+        
+    }
+}
