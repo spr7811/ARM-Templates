@@ -181,7 +181,21 @@
                             "priority": 100,
                             "direction": "Inbound"
                         }
-                    }
+                    },
+                    {
+				"name": "web_rule",
+				"properties": {
+					"description": "Allow WEB",
+					"protocol": "*",
+					"sourcePortRange": "*",
+					"destinationPortRange": "80",
+					"sourceAddressPrefix": "*",
+					"destinationAddressPrefix": "*",
+					"access": "Allow",
+					"priority": 101,
+					"direction": "Inbound"
+				}
+			}
                 ]
             }
             
@@ -279,13 +293,16 @@
 
                     "computerName": "windowsVm",
                     "adminUsername": "[parameters('vmusername')]",
-                    "adminPassword": "[parameters('vmpaswd')]"
+                    "adminPassword": "[parameters('vmpaswd')]",
+                    "windowsConfiguration": {
+					"provisionVmAgent": true
+				}
                 },
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "MicrosoftWindowsServer",
                         "offer": "WindowsServer",
-                        "sku": "2012-R2-Datacenter",
+                        "sku": "2016-Datacenter-smalldisk",
                         "version": "latest"
                     },
                     "osDisk": {
